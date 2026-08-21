@@ -1,0 +1,56 @@
+{
+	"name": "pi-beacon",
+	"version": "0.1.0",
+	"description": "Authoritative lifecycle state (idle/working/compacting/retrying) for a running Pi instance, exposed via unix socket and state file",
+	"keywords": [
+		"pi-package",
+		"extension",
+		"status",
+		"lifecycle",
+		"monitoring"
+	],
+	"type": "module",
+	"packageManager": "pnpm@11.13.0",
+	"files": [
+		"src",
+		"README.md",
+		"LICENSE"
+	],
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/apetersson/pi-beacon.git"
+	},
+	"homepage": "https://github.com/apetersson/pi-beacon#readme",
+	"bugs": {
+		"url": "https://github.com/apetersson/pi-beacon/issues"
+	},
+	"scripts": {
+		"check": "tsc --noEmit",
+		"format": "prettier --write .",
+		"format:check": "prettier --check .",
+		"lint": "eslint . --max-warnings 0",
+		"test": "node --experimental-strip-types --test test/*.test.mjs",
+		"verify": "pnpm run format:check && pnpm run check && pnpm run lint && pnpm run test"
+	},
+	"engines": {
+		"node": ">=22"
+	},
+	"peerDependencies": {
+		"@earendil-works/pi-coding-agent": "*"
+	},
+	"devDependencies": {
+		"@earendil-works/pi-coding-agent": "^0.84.2",
+		"@eslint/js": "^10.0.1",
+		"eslint": "^10.8.1",
+		"eslint-config-prettier": "^10.1.8",
+		"prettier": "^3.9.6",
+		"typescript": "^5.6.0",
+		"typescript-eslint": "^8.67.0"
+	},
+	"pi": {
+		"extensions": [
+			"./src/index.ts"
+		]
+	}
+}
