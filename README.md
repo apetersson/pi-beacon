@@ -57,6 +57,26 @@ echo '{"type":"get_state"}' | nc -U ~/.pi/agent/beacon/12345.sock | jq .
 
 Unknown commands get `success: false`. The extension is strictly read-only: the socket never injects prompts or controls the instance.
 
+## pi-beacon vs RPC mode
+
+The observability half of Pi's `--mode rpc`, published from inside any running instance.
+
+Pi's RPC mode gives machine-readable state — but only over stdin/stdout of a process launched in RPC mode. pi-beacon publishes that same lifecycle truth from inside ordinary interactive sessions, read-only, keyed by PID. It is also ahead of RPC in one respect: `get_state` does not expose compaction reasons or retry backoff, while the beacon state document shows both.
+
+What RPC mode provides that pi-beacon deliberately does not:
+
+| Capability                                                               | RPC mode                               | pi-beacon                                                |
+| ------------------------------------------------------------------------ | -------------------------------------- | -------------------------------------------------------- |
+| Lifecycle state (`isStreaming` / `isCompacting`)                         | yes                                    | yes, plus compaction reason and retry backoff            |
+| Settled signal (`agent_settled`)                                         | push                                   | same semantics via poll (file heartbeat or socket query) |
+| Control (`prompt`, `steer`, `abort`, `compact`, `set_model`, `bash`)     | yes                                    | none, by design — strictly read-only                     |
+| Live event stream (`message_update`, `tool_execution_*`, `queue_update`) | push                                   | none; consumers re-poll                                  |
+| History access (`get_messages`, `get_entries`, `get_tree`, fork/clone)   | yes                                    | none                                                     |
+| Session token/cost totals, `export_html`                                 | yes                                    | current context-window estimate only                     |
+| Transport                                                                | stdin/stdout of an instance you launch | unix socket + state file next to a running instance      |
+
+Rule of thumb: if you need to _drive_ the agent or stream its tokens, use RPC mode with a process you control. If you need to _watch_ one or many already-running instances reliably, use pi-beacon.
+
 ## Finding instances
 
 State documents are keyed by PID. Map a terminal surface to its Pi PID the usual way (`ps -t <tty>`), then read `~/.pi/agent/beacon/<pid>.json` — or glob `~/.pi/agent/beacon/*.json` for all live instances and filter by `cwd` / `sessionName`.
