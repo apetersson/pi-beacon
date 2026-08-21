@@ -61,6 +61,64 @@ Unknown commands get `success: false`. The extension is strictly read-only: the 
 
 State documents are keyed by PID. Map a terminal surface to its Pi PID the usual way (`ps -t <tty>`), then read `~/.pi/agent/beacon/<pid>.json` — or glob `~/.pi/agent/beacon/*.json` for all live instances and filter by `cwd` / `sessionName`.
 
+### Worked example: an instance querying its own beacon
+
+A pi session can find its own beacon by walking up its process tree to the `pi` parent, then consume its state both ways — passive file read and active socket query:
+
+```bash
+# 1) All live beacons: one <pid>.json + <pid>.sock pair per running instance.
+ls -la ~/.pi/agent/beacon/
+
+# 2) Find our own pi PID: hop up parent PIDs until the command is "pi".
+#    (Same join the cmux waiters do via `ps -t <tty>`, just from inside.)
+PID=$$; for i in 1 2 3 4 5; do
+  P=$(ps -o ppid= -p $PID | tr -d ' ')
+  [ "$P" = "1" ] && break                    # reached init without finding pi
+  CMD=$(ps -o comm= -p $P)
+  if [ "$(basename $CMD)" = "pi" ]; then MYPI=$P; break; fi
+  PID=$P
+done
+
+# 3) Passive path: read the state document from disk. Cheap polling; works
+#    from any script with no socket client.
+cat ~/.pi/agent/beacon/$MYPI.json
+
+# 4) Active path: query the unix socket for a freshly built document.
+#    nc -U targets a unix domain socket instead of TCP.
+echo '{"type":"get_state"}' | nc -U ~/.pi/agent/beacon/$MYPI.sock | python3 -m json.tool
+```
+
+Step 4 pretty-prints to (values from a real mid-turn observation, identifiers genericized):
+
+```json
+{
+	"type": "response",
+	"command": "get_state",
+	"success": true,
+	"data": {
+		"schema": "pi-beacon/v1",
+		"pid": 2251,
+		"state": "working",
+		"detail": { "pendingMessages": false },
+		"model": "provider/model-id",
+		"sessionFile": "~/.pi/agent/sessions/<project>/<timestamp>_<session-id>.jsonl",
+		"sessionId": "01a023f1-...",
+		"sessionName": null,
+		"cwd": "/Users/me/code/project",
+		"contextUsage": { "tokens": 116718, "contextWindow": 1048576, "percent": 11.13 },
+		"startedAt": 1787319083497,
+		"updatedAt": 1787319118165
+	}
+}
+```
+
+What this shows:
+
+- The **envelope** (`type` / `command` / `success`) deliberately mirrors Pi's RPC-mode response shape; a bad command returns `"success": false` with an `error` field instead.
+- The instance reported `"state": "working"` while executing step 3 — the bash call runs inside its agent run loop. A screen scraper would have to regex a spinner; the beacon just knows.
+- Between the step-3 file read and the step-4 socket reply, `contextUsage.tokens` climbed and `updatedAt` advanced: the document is live, and the socket always returns a fresh snapshot rather than the last written one.
+- When the turn ends, the same query flips to `"state": "idle"` — the settled signal coordinators can wait on.
+
 ## Install
 
 ```bash
