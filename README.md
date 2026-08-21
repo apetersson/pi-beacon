@@ -1,6 +1,6 @@
 # pi-beacon
 
-Authoritative lifecycle state for a running [Pi coding agent](https://pi.dev) instance, published where external tools can read it — no screen scraping, no spinner regexes.
+Authoritative lifecycle state for a running [Pi coding agent](https://pi.dev) instance, published where external tools can read it.
 
 While an instance runs, pi-beacon publishes:
 
