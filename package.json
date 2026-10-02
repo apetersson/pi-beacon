@@ -1,6 +1,6 @@
 {
 	"name": "pi-beacon",
-	"version": "0.1.0",
+	"version": "1.2.0",
 	"description": "Authoritative lifecycle state (idle/working/compacting/retrying) for a running Pi instance, exposed via unix socket and state file",
 	"keywords": [
 		"pi-package",
