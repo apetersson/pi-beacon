@@ -1,8 +1,8 @@
-# pi-beacon
+# @apetersson/pi-beacon
 
 Authoritative lifecycle state for a running [Pi coding agent](https://pi.dev) instance, published where external tools can read it.
 
-While an instance runs, pi-beacon publishes:
+While an instance runs, @apetersson/pi-beacon publishes:
 
 ```text
 ~/.pi/agent/beacon/<pid>.json   state document, atomically rewritten
@@ -11,7 +11,7 @@ While an instance runs, pi-beacon publishes:
 
 ## Why
 
-Pi's TUI shows busy state as spinner text (`Working...`, `Auto-compacting...`, `Retrying (1/3) in 2s...`). That text is fragile to match and ambiguous: auto-compaction after context overflow, retry backoff, and queued follow-ups all look like "working" — or briefly like "idle" — from the outside. pi-beacon derives state from Pi's own lifecycle events _inside_ the process and distinguishes exactly:
+Pi's TUI shows busy state as spinner text (`Working...`, `Auto-compacting...`, `Retrying (1/3) in 2s...`). That text is fragile to match and ambiguous: auto-compaction after context overflow, retry backoff, and queued follow-ups all look like "working" — or briefly like "idle" — from the outside. @apetersson/pi-beacon derives state from Pi's own lifecycle events _inside_ the process and distinguishes exactly:
 
 | state        | meaning                                                                                                                                     |
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -57,15 +57,15 @@ echo '{"type":"get_state"}' | nc -U ~/.pi/agent/beacon/12345.sock | jq .
 
 Unknown commands get `success: false`. The extension is strictly read-only: the socket never injects prompts or controls the instance.
 
-## pi-beacon vs RPC mode
+## @apetersson/pi-beacon vs RPC mode
 
 The observability half of Pi's `--mode rpc`, published from inside any running instance.
 
-Pi's RPC mode gives machine-readable state — but only over stdin/stdout of a process launched in RPC mode. pi-beacon publishes that same lifecycle truth from inside ordinary interactive sessions, read-only, keyed by PID. It is also ahead of RPC in one respect: `get_state` does not expose compaction reasons or retry backoff, while the beacon state document shows both.
+Pi's RPC mode gives machine-readable state — but only over stdin/stdout of a process launched in RPC mode. @apetersson/pi-beacon publishes that same lifecycle truth from inside ordinary interactive sessions, read-only, keyed by PID. It is also ahead of RPC in one respect: `get_state` does not expose compaction reasons or retry backoff, while the beacon state document shows both.
 
-What RPC mode provides that pi-beacon deliberately does not:
+What RPC mode provides that @apetersson/pi-beacon deliberately does not:
 
-| Capability                                                               | RPC mode                               | pi-beacon                                                |
+| Capability                                                               | RPC mode                               | @apetersson/pi-beacon                                    |
 | ------------------------------------------------------------------------ | -------------------------------------- | -------------------------------------------------------- |
 | Lifecycle state (`isStreaming` / `isCompacting`)                         | yes                                    | yes, plus compaction reason and retry backoff            |
 | Settled signal (`agent_settled`)                                         | push                                   | same semantics via poll (file heartbeat or socket query) |
@@ -75,7 +75,7 @@ What RPC mode provides that pi-beacon deliberately does not:
 | Session token/cost totals, `export_html`                                 | yes                                    | current context-window estimate only                     |
 | Transport                                                                | stdin/stdout of an instance you launch | unix socket + state file next to a running instance      |
 
-Rule of thumb: if you need to _drive_ the agent or stream its tokens, use RPC mode with a process you control. If you need to _watch_ one or many already-running instances reliably, use pi-beacon.
+Rule of thumb: if you need to _drive_ the agent or stream its tokens, use RPC mode with a process you control. If you need to _watch_ one or many already-running instances reliably, use @apetersson/pi-beacon.
 
 ## Finding instances
 
@@ -142,7 +142,7 @@ What this shows:
 ## Install
 
 ```bash
-pi install npm:pi-beacon
+pi install npm:@apetersson/pi-beacon
 ```
 
 Then restart Pi. Requires pi 1.x and Node.js 22.19.0 or newer. Validated against pi 1.0.0.
@@ -150,7 +150,7 @@ Then restart Pi. Requires pi 1.x and Node.js 22.19.0 or newer. Validated against
 ## Related
 
 - [`pi-presence`](https://www.npmjs.com/package/pi-presence) — per-session state files with a `working`/`blocked`/`idle`/`dormant` vocabulary and a menu-bar reader.
-- [`@vanillagreen/pi-session-bridge`](https://www.npmjs.com/package/@vanillagreen/pi-session-bridge) — full control channel (prompts, steering, aborts) over a unix socket. pi-beacon deliberately does the opposite: state out, nothing in.
+- [`@vanillagreen/pi-session-bridge`](https://www.npmjs.com/package/@vanillagreen/pi-session-bridge) — full control channel (prompts, steering, aborts) over a unix socket. @apetersson/pi-beacon deliberately does the opposite: state out, nothing in.
 
 ## License
 
