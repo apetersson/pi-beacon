@@ -246,6 +246,11 @@ export default function (pi: ExtensionAPI): void {
 		writeState(false);
 	});
 
+	pi.on("session_compact_failed", () => {
+		compaction = null;
+		writeState(false);
+	});
+
 	pi.on("session_shutdown", () => {
 		stopBeacon();
 	});
