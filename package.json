@@ -34,13 +34,13 @@
 		"verify": "pnpm run format:check && pnpm run check && pnpm run lint && pnpm run test"
 	},
 	"engines": {
-		"node": ">=22"
+		"node": ">=22.19.0"
 	},
 	"peerDependencies": {
-		"@earendil-works/pi-coding-agent": "*"
+		"@earendil-works/pi-coding-agent": "^1.0.0"
 	},
 	"devDependencies": {
-		"@earendil-works/pi-coding-agent": "^0.84.2",
+		"@earendil-works/pi-coding-agent": "^1.0.0",
 		"@eslint/js": "^10.0.1",
 		"eslint": "^10.8.1",
 		"eslint-config-prettier": "^10.1.8",

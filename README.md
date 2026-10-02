@@ -145,7 +145,7 @@ What this shows:
 pi install npm:pi-beacon
 ```
 
-Then restart Pi. Requires pi with extension events `session_before_compact`/`session_compact`/`agent_settled` (≥ 0.84).
+Then restart Pi. Requires pi 1.x and Node.js 22.19.0 or newer. Validated against pi 1.0.0.
 
 ## Related
 
